@@ -13,14 +13,28 @@ class Map extends React.Component {
     });
 
     this.map.setView([43.89, -72.7317], 8);
-    this.props.vtBorder.addTo(this.map).setStyle({fillColor: 'rgb(0,0,0,0)'})
+    this.props.vtBorder.addTo(this.map).setStyle({fillColor: 'rgba(0,0,0,0)'})
   }
 
-  componentDidUpdate({centerView, gameStarted}) {
-    if(gameStarted && this.props.centerView !== centerView) {
-      this.map.setView(this.props.centerView, 18)
+  componentDidUpdate({ centerView }) {
+    this.map.removeControl(this.map.zoomControl);
+    this.map.touchZoom.disable();
+    this.map.dragging.disable();
+    this.map.doubleClickZoom.disable();
+    this.map.scrollWheelZoom.disable();
+    this.map.boxZoom.disable();
+    this.map.keyboard.disable();
+    if(this.props.gameStarted && this.props.centerView !== centerView) {
+      this.map.setView(this.props.centerView, 18);
     }
-
+    else if(!this.props.gameStarted) {
+      this.map.touchZoom.enable();
+      this.map.dragging.enable();
+      this.map.doubleClickZoom.enable();
+      this.map.scrollWheelZoom.enable();
+      this.map.boxZoom.enable();
+      this.map.keyboard.enable(); 
+    }
   }
 
   render() {
