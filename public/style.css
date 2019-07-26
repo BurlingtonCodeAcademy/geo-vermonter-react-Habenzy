@@ -3,6 +3,7 @@
 }
 
 #game-area {
+  margin: 10px;
   display: grid;
   grid-template-columns: 1fr 8fr 1fr;
   grid-template-areas: 

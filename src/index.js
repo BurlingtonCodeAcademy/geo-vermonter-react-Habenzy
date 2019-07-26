@@ -3,37 +3,38 @@ import ReactDOM from 'react-dom';
 import L from 'leaflet';
 import borderData from './border';
 import LeafletPip from '@mapbox/leaflet-pip';
+import InfoBox from './info-box';
 
+//-------------React Components----------------------//
 import Map from './map';
+import Modal from './modal'
 
+//-------------Main React parent Component-------------//
 class App extends React.Component {
   state = {
     gameStarted: false,
 
+    modalDisplayed: false,
+
     vtBorder: L.geoJSON(borderData),
 
-    centerView: {
+    centerView: {//the location of the current map center
       lat: 44,
       lng: -72.317
     },
 
-    initialPoint: {
+    initialPoint: {//the location of the initial random point
       lat: 44,
       lng: -72.317
     }
   }
 
-  componentDidMount() {
-    document.getElementById('quit').disabled = true;
-    document.getElementById('guess').disabled = true
-  }
-
-  getRandoLat() {
+  getRandoLat() {//Random Lat using max and min lats for VT
     let lat = Math.random() * (45.005419 - 42.730315) + 42.730315;
     return lat;
   }
 
-  getRandoLng() {
+  getRandoLng() {//Random Lng using max and min lngs for VT
     let lng = (Math.random() * (71.510225 - 73.35218) + 73.35218) * -1;
     return lng;
   }
@@ -44,14 +45,11 @@ class App extends React.Component {
     let layerArray = []
 
     while (layerArray.length === 0) {
+      randomLat = this.getRandoLat();
+      randomLng = this.getRandoLng();
       layerArray = LeafletPip.pointInLayer([randomLng, randomLat], L.geoJSON(borderData))
-      if (!layerArray.length) {
-        console.log('Not in VT!')
-        randomLat = this.getRandoLat();
-        randomLng = this.getRandoLng();
-      }
-    }
-    console.log(`In VT at ${randomLat} ${randomLng}! Setting state...`)
+    };
+
     this.setState(
       {
         gameStarted: true,
@@ -65,24 +63,16 @@ class App extends React.Component {
         }
       }
     );
-    
-    document.getElementById('start').disabled = true;
-    document.getElementById('quit').disabled = false;
-    document.getElementById('guess').disabled = false
   }
 
-  giveUp = () => {
+  giveUp = () => {//on quit button click
     this.setState({ gameStarted: false })
-    document.getElementById('start').disabled = false;
-    document.getElementById('quit').disabled = true;
-    document.getElementById('guess').disabled = true
   }
 
-  guess = () => {
-    this.setState({ gameStarted: false })
-    document.getElementById('start').disabled = false;
-    document.getElementById('quit').disabled = true;
-    document.getElementById('guess').disabled = true
+  guess = () => {//on guess button click
+    this.setState({
+      modalDisplayed: true
+    })
   }
 
   moveNorth = () => {
@@ -95,6 +85,7 @@ class App extends React.Component {
       })
   }
 
+  //indv move functions for now, refactor down to generic later
   moveSouth = () => {
     this.setState(
       {
@@ -126,13 +117,14 @@ class App extends React.Component {
   }
 
   render() {
-    let { centerView, vtBorder, gameStarted, initialPoint } = this.state
+    let { centerView, vtBorder, gameStarted, initialPoint, modalDisplayed } = this.state
     return (
       <div>
+        <Modal modalDisplayed = {modalDisplayed}/>
         <div id="game-buttons">
-          <button id="start" onClick={this.startGame}>Start</button>
-          <button id="quit" onClick={this.giveUp}>Give Up</button>
-          <button id="guess" onClick={this.guess}>Guess</button>
+          <button id="start" onClick={this.startGame} disabled={this.state.gameStarted}>Start</button>
+          <button id="quit" onClick={this.giveUp} disabled={!this.state.gameStarted}>Give Up</button>
+          <button id="guess" onClick={this.guess} disabled={!this.state.gameStarted}>Guess</button>
         </div>
         <div id="game-area">
           <button id="north" className="move-button" onClick={this.moveNorth} >Go North</button>
@@ -141,6 +133,7 @@ class App extends React.Component {
           <button id="west" className="move-button" onClick={this.moveWest} >Go West</button>
           <Map centerView={centerView} vtBorder={vtBorder} gameStarted={gameStarted} initialPoint={initialPoint} />
         </div>
+        <InfoBox />
       </div>
     )
   }
