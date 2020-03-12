@@ -2,7 +2,7 @@ import React from 'react'
 
 class InfoBox extends React.Component {
   render() {
-    return(<div />)
+    return(<div>So useful. Much info.</div>)
   }
 }
 
